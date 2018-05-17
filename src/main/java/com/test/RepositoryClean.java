@@ -163,14 +163,24 @@ public class RepositoryClean {
                 System.out.println(delete);
             }
             System.out.println();
+            int count = 0;
             for (String deleteName : deletePath) {
                 File fileName = new File(deleteName);
                 File[] files = fileName.listFiles();
-                for (File fileTemp : files) {
-                    fileTemp.delete();
+                if (files != null) {
+                    for (File fileTemp : files) {
+                        boolean flag = fileTemp.delete();
+                        if (flag) {
+                            count ++;
+                        }
+                    }
+                    boolean flag = fileName.delete();
+                    if (flag) {
+                        count ++;
+                    }
                 }
-                fileName.delete();
             }
+            System.out.println("共删除: " + count);
         }
     }
 
