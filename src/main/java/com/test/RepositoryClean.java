@@ -147,6 +147,7 @@ public class RepositoryClean {
     private void deletePath(String path) {
         File file = new File(path);
         if (file.exists()) {
+            List<String> deleteFile = new ArrayList<>();
             List<String> deletePath = new ArrayList<>();
             // 获取所有的子文件，不包含目录
             List<String> childPath = getAllFilePaths(file);
@@ -155,15 +156,34 @@ public class RepositoryClean {
                 if (fileName.endsWith(".lastUpdated")) {
                     fileName = fileName.replaceAll("\\\\", "/");
                     String filePath = fileName.substring(0, fileName.lastIndexOf("/"));
-                    addList(deletePath, filePath);
+                    // 如果.lastUpdated对应的有文件，则只删除此.lastUpdated文件
+                    String fileNameLast = fileName.substring(0, fileName.lastIndexOf(".lastUpdated"));
+                    if (new File(fileNameLast).exists()) {
+                        addList(deleteFile, fileName);
+                    } else {
+                        addList(deletePath, filePath);
+                    }
                 }
             }
+            System.out.println("删除文件");
+            for (String delete : deleteFile) {
+                System.out.println(delete);
+            }
+            System.out.println();
             System.out.println("删除目录");
             for (String delete : deletePath) {
                 System.out.println(delete);
             }
             System.out.println();
-            int count = 0;
+            int fileCount = 0;
+            int pathCount = 0;
+            for (String deleteName : deleteFile) {
+                File fileName = new File(deleteName);
+                boolean flag = fileName.delete();
+                if (flag) {
+                    fileCount ++;
+                }
+            }
             for (String deleteName : deletePath) {
                 File fileName = new File(deleteName);
                 File[] files = fileName.listFiles();
@@ -171,16 +191,18 @@ public class RepositoryClean {
                     for (File fileTemp : files) {
                         boolean flag = fileTemp.delete();
                         if (flag) {
-                            count ++;
+                            pathCount ++;
                         }
                     }
                     boolean flag = fileName.delete();
                     if (flag) {
-                        count ++;
+                        pathCount ++;
                     }
                 }
             }
-            System.out.println("共删除: " + count);
+            System.out.println("删除文件: " + fileCount);
+            System.out.println("删除目录: " + pathCount);
+            System.out.println("共删除: " + (fileCount + pathCount));
         }
     }
 
